@@ -1,4 +1,7 @@
+import os
 import numpy as np
+import pickle
+
 from matplotlib import pyplot as plt
 from mpl_toolkits import mplot3d
 
@@ -6,7 +9,11 @@ from evolutionary_strategies import ES
 from objective_functions import objective_function
 
 
-def plot_objective(objective_fun, range_min, range_max, N=50):
+def plot_objective(fun_name, range_min=None, range_max=None, N=50):
+    objective_fun = objective_function(fun_name)['function']
+    if range_min is None and range_max is None:
+        range_min, range_max = objective_function(fun_name)['domain']
+
     x = np.linspace(range_min, range_max, N)
     y = np.linspace(range_min, range_max, N)
     X, Y = np.meshgrid(x, y)
@@ -40,7 +47,7 @@ def plot_sigmas(result):
     plt.show()
 
 
-def run_test(**kwargs):
+def run_test(plot_diagrams=True, **kwargs):
     function_name = kwargs['function_name']
     fun = objective_function(function_name)['function']
     domain = objective_function(function_name)['domain']
@@ -56,7 +63,23 @@ def run_test(**kwargs):
     tau0 = K / np.sqrt(2*np.sqrt(d))
     res = es.optimize(mu, lam, tau, tau0, max_iters, mode)
 
-    print(f'Maximum found:{res["result"]}')
-    plot_history(res)
-    plot_sigmas(res)
+    if plot_diagrams:
+        plot_history(res)
+        plot_sigmas(res)
+
     return res
+
+
+def show_results(function_name, d, mode):
+    for filename in os.listdir('results'):
+        with open(f'results/{filename}', 'rb') as f:
+            params = pickle.load(f)
+            results = pickle.load(f)
+            if params['function_name'] == function_name and \
+                    params['d'] == d and params['mode'] == mode:
+                plot_history(results)
+                plot_sigmas(results)
+                max_found = results['result'][np.newaxis, :]
+                max_val = objective_function(function_name)['function'](max_found)
+                print(f'Max value found: {max_val}')
+                return

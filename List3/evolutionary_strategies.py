@@ -35,7 +35,8 @@ class ES(object):
             iter_finish_timestamp = time()
             iter_time_elapsed = iter_finish_timestamp - iter_start_timestamp
             eta = iter_time_elapsed * (max_iterations - t)
-            print(f't = {t}, max = {max_history[t]}, avg_sigma = {avg_sigma_history[t]:.2f}, iter time = {iter_time_elapsed:.2f}s ETA = {eta:.2f}s')
+            if t % 200 == 0:
+                print(f't = {t}, max = {max_history[t]}, avg_sigma = {avg_sigma_history[t]:.2f}, iter time = {iter_time_elapsed:.2f}s ETA = {eta:.2f}s')
 
         total_finish_timestamp = time()
         total_time_elapsed = total_finish_timestamp - total_start_timestamp
